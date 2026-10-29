@@ -1,0 +1,18 @@
+Olá a todos, sejam muito bem-vindos à nossa apresentação!
+Neste roteiro de demonstração, você pode testar a leitura fluida olhando diretamente para a câmera enquanto avança os slides no *PowerPoint* ou *Google Slides*.
+
+[SLIDE 1 - INTRODUÇÃO E CONTEXTO]
+
+Observe como os cliques do mouse atravessam esta janela quando estamos no *Modo Foco-Seguro*.
+Você pode clicar nos seus slides atrás deste texto ou usar as *Setas do Teclado* e o *Passador de Slides* sem nenhuma interferência.
+
+[SLIDE 2 - MÉTRICAS E RESULTADOS]
+
+Para descer o texto no seu próprio ritmo, basta tocar na tecla *Numpad 2* (ou *Alt + Seta para Baixo*).
+Se precisar voltar um trecho, toque em *Numpad 8* ou *Numpad 6* (ou *Alt + Seta para Cima*).
+E se preferir uma rolagem contínua automática, pressione *Numpad 5* (ou *Alt + P*).
+
+[SLIDE 3 - CONCLUSÃO E PRÓXIMOS PASSOS]
+
+Agradecemos a presença de todos!
+Agora abrimos espaço para perguntas e comentários.

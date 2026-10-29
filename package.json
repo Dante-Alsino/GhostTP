@@ -1,0 +1,22 @@
+{
+  "name": "ghost-tp",
+  "version": "1.0.0",
+  "description": "GhostTP — Teleprompter Overlay Focus-Safe (Always on Top, Click-Through, Invisible to Screen Capture)",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "keywords": [
+    "ghost-tp",
+    "teleprompter",
+    "overlay",
+    "electron",
+    "focus-safe",
+    "presentation"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^41.2.1"
+  }
+}

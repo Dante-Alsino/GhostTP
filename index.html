@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Teleprompter Overlay (Focus-Safe)</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="is-locked">
+  <div id="app-container">
+    <!-- Barra de Progresso de Leitura no Topo -->
+    <div class="progress-track">
+      <div id="progress-bar" class="progress-fill"></div>
+    </div>
+
+    <!-- Cabeçalho / HUD de Status -->
+    <header id="hud-header">
+      <!-- Área de Arraste (Drag Handle) -->
+      <div class="hud-left">
+        <span class="drag-handle" title="Arraste por aqui no Modo Edição">⠿</span>
+        <span id="mode-badge" class="badge badge-locked" title="Pressione Num 0 ou Alt+L para alternar">
+          🔒 FOCO-SEGURO (CLICK-THROUGH)
+        </span>
+        <span id="autoscroll-badge" class="badge badge-neutral">
+          ⏸ MANUAL
+        </span>
+        <span id="font-badge" class="badge badge-neutral" title="Tamanho atual da fonte (Num 9 / Num 7 ou Alt+. / Alt+,)">
+          🔤 32px
+        </span>
+        <span id="protection-badge" class="badge badge-shield" title="Invisível em gravações e compartilhamento de tela (Zoom/Meet/OBS)">
+          🛡️ OCULTO NA CAPTURA
+        </span>
+        <span id="numpad-badge" class="badge badge-warning hidden" title="Pressione Alt+K para reativar o Numpad">
+          ⌨️ NUMPAD PAUSADO (Alt+K)
+        </span>
+      </div>
+
+      <!-- Dicas rápidas quando travado (Modo Apresentação) -->
+      <div id="locked-hints" class="hud-hints">
+        <span><kbd>Num 2</kbd> Descer</span>
+        <span><kbd>Num 8/6</kbd> Subir</span>
+        <span><kbd>Num 9/7</kbd> ou <kbd>Alt+./,</kbd> Fonte</span>
+        <span><kbd>Num 5</kbd> Auto</span>
+        <span><kbd>Num +/-</kbd> Veloc.</span>
+        <span><kbd>Num 0</kbd> / <kbd>Alt+L</kbd> Editar</span>
+      </div>
+
+      <!-- Botões de ação quando destravado (Modo Edição/Configuração) -->
+      <div id="unlocked-toolbar" class="hud-toolbar">
+        <button type="button" id="btn-load-file" class="tool-btn" title="Importar arquivo .txt ou .md">
+          📂 Abrir .TXT
+        </button>
+        <button type="button" id="btn-toggle-editor" class="tool-btn" title="Editar ou colar roteiro manualmente">
+          📝 Editar Texto
+        </button>
+        <button type="button" id="btn-reset-scroll" class="tool-btn" title="Voltar para o início (Num 1)">
+          ⏮ Topo
+        </button>
+        <button type="button" id="btn-autoscroll" class="tool-btn" title="Iniciar/Pausar rolagem contínua (Num 5)">
+          ▶ Auto
+        </button>
+
+        <div class="toolbar-divider"></div>
+
+        <!-- Controle de Tamanho da Fonte (Botões A- / A+ e Slider direto) -->
+        <div class="font-control-group" title="Ajustar tamanho das letras (Num 7 / Num 9 ou Alt+, / Alt+.)">
+          <button type="button" id="btn-font-dec" class="tool-btn">A-</button>
+          <input
+            type="range"
+            id="font-size-slider"
+            min="16"
+            max="80"
+            step="2"
+            value="32"
+            aria-label="Tamanho da fonte"
+          />
+          <span id="font-size-label" class="toolbar-metric">32px</span>
+          <button type="button" id="btn-font-inc" class="tool-btn">A+</button>
+        </div>
+
+        <div class="toolbar-divider"></div>
+
+        <button type="button" id="btn-speed-dec" class="tool-btn" title="Diminuir passo/velocidade (Num -)">-</button>
+        <span id="speed-label" class="toolbar-metric" title="Passo manual / Velocidade">100px</span>
+        <button type="button" id="btn-speed-inc" class="tool-btn" title="Aumentar passo/velocidade (Num +)">+</button>
+
+        <div class="toolbar-divider"></div>
+
+        <button type="button" id="btn-opacity-dec" class="tool-btn" title="Mais transparente (Num 4)">◐-</button>
+        <button type="button" id="btn-opacity-inc" class="tool-btn" title="Mais escuro (Num 3)">◐+</button>
+        <button type="button" id="btn-mirror" class="tool-btn" title="Espelhar texto horizontalmente">⇄</button>
+        <button type="button" id="btn-center-top" class="tool-btn" title="Centralizar no topo perto da Webcam">🎯 Topo</button>
+        <button type="button" id="btn-lock-now" class="tool-btn btn-primary" title="Ativar modo Focus-Safe para apresentar (Num 0 / Alt+L)">
+          🔒 Apresentar (Num 0)
+        </button>
+        <button type="button" id="btn-quit" class="tool-btn btn-danger" title="Fechar Teleprompter (Ctrl+Shift+Q)">✕</button>
+      </div>
+    </header>
+
+    <!-- Área Principal: Guia de Leitura + Roteiro Renderizado -->
+    <main id="prompter-stage">
+      <!-- Faixa Guia de Leitura (Linha dos Olhos / Webcam) -->
+      <div id="reading-guide" aria-hidden="true">
+        <span class="guide-arrow left">▸</span>
+        <div class="guide-band"></div>
+        <span class="guide-arrow right">◂</span>
+      </div>
+
+      <!-- Viewport que realiza o Scroll Suave -->
+      <div id="prompter-viewport">
+        <div id="prompter-content"></div>
+      </div>
+
+      <!-- Painel Editor de Roteiro (Visível apenas quando acionado no Modo Edição) -->
+      <div id="editor-panel" class="hidden">
+        <div class="editor-header">
+          <span><strong>Editor de Roteiro</strong> — Use <code>[SLIDE]</code> ou <code>---</code> em uma linha para aviso de slide, e <code>*texto*</code> para destacar palavras.</span>
+          <div class="editor-actions">
+            <button type="button" id="btn-sample-script" class="tool-btn">Restaurar Exemplo</button>
+            <button type="button" id="btn-save-editor" class="tool-btn btn-primary">✓ Salvar e Visualizar</button>
+          </div>
+        </div>
+        <textarea
+          id="script-textarea"
+          spellcheck="false"
+          placeholder="Cole ou digite o roteiro da sua apresentação aqui..."
+        ></textarea>
+      </div>
+    </main>
+
+    <!-- Rodapé discreto de métricas -->
+    <footer id="hud-footer">
+      <span id="scroll-progress-text">Progresso: 0%</span>
+      <span id="word-count-text">0 palavras (~0 min de fala)</span>
+      <span id="last-command-toast" class="command-toast">Pronto</span>
+    </footer>
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>
